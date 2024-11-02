@@ -1,7 +1,7 @@
-
 class ReactiveEffect {
     private _fn: any
-    constructor(fn) {
+
+    constructor(fn, public scheduler?) {
         this._fn = fn
     }
 
@@ -43,8 +43,8 @@ export function trigger(target, key) {
 }
 
 let activeEffect
-export function effect(fn) {
-    const _effect = new ReactiveEffect(fn)
+export function effect(fn, options: any = {}) {
+    const _effect = new ReactiveEffect(fn, options.scheduler)
 
     _effect.run()
 
