@@ -38,6 +38,7 @@ describe("effcet", () => {
         // 2. effect 第一次执行的时候才会执行fn
         // 3. 当响应式对象触发set的时候，不执行fn, 而是执行scheduler
         // 4. 执行runner的时候，再次执行fn
+        // 这行注释用于测试一下整个git操作流程，没有其他意义
         let dummy
         let run: any
         const scheduler = jest.fn(() => {
