@@ -1,6 +1,10 @@
+import { extend } from "../utils";
 
 class ReactiveEffect {
     private _fn: any
+    deps = [];
+    active = true;
+    onStop?: () => void
 
     constructor(fn, public scheduler?) {
         this._fn = fn
@@ -11,7 +15,23 @@ class ReactiveEffect {
 
         return this._fn()
     }
+    stop() {
+        if (this.active) {
+            cleanup(this)
+            if (this.onStop) {
+                this.onStop()
+            }
+            this.active = false;
+        }
+    }
 }
+
+function cleanup(effect) {
+    effect.deps.forEach((dep: Set<ReactiveEffect>) => {
+        dep.delete(effect)
+    })
+}
+
 
 const targetsMap = new Map();
 export function track(target, key) {
@@ -27,8 +47,12 @@ export function track(target, key) {
         depsMap.set(key, dep);
     }
 
-    //这里, 如何拿到需要被收集的依赖？
+    //activeEffect maybe undefined
+    if (!activeEffect) return
+
+    //这里, 如何拿到需要被收集的依赖？（activeEffect的作用）
     dep.add(activeEffect)
+    activeEffect.deps.push(dep);
 }
 
 export function trigger(target, key) {
@@ -47,7 +71,15 @@ let activeEffect
 export function effect(fn, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler)
 
-    _effect.run()
+    extend(_effect, options)
 
-    return _effect.run.bind(_effect)
+    _effect.run()
+    const runner: any = _effect.run.bind(_effect)
+    runner.effcet = _effect;
+
+    return runner
+}
+
+export function stop(runner) {
+    runner.effcet.stop()
 }

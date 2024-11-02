@@ -1,4 +1,4 @@
-import { effect, reactive } from "../../reactivity"
+import { effect, reactive, stop } from "../../reactivity"
 
 describe("effcet", () => {
     it("happy path", () => {
@@ -62,5 +62,34 @@ describe("effcet", () => {
         run()
         // should have run
         expect(dummy).toBe(2)
+    })
+
+    it('stop', () => {
+        //stop用于停止对响应式数据的自动追踪和依赖收集，手动控制effect的生命周期
+        //stop之后仍可以手动调用effect
+        let dummy
+        const obj = reactive({ prop: 1 })
+        const runner = effect(() => {
+            dummy = obj.prop
+        })
+        obj.prop = 2
+        expect(dummy).toBe(2)
+        stop(runner)
+        obj.prop = 3
+        expect(dummy).toBe(2)
+
+        // stopped effect should still be manually callable
+        runner()
+        expect(dummy).toBe(3)
+    })
+
+    it('events: onStop', () => {
+        const onStop = jest.fn()
+        const runner = effect(() => { }, {
+            onStop,
+        })
+
+        stop(runner)
+        expect(onStop).toHaveBeenCalled()
     })
 })
