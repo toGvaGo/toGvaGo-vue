@@ -1,5 +1,5 @@
-import { extend } from "../utils";
 
+import { extend } from "../utils";
 class ReactiveEffect {
     private _fn: any
     deps = [];
