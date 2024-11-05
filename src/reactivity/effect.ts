@@ -1,8 +1,8 @@
-import { extend } from "../utils";
 
 let activeEffect
-let shouldBeTracked = true
+let shouldTrack = true
 
+import { extend } from "../utils";
 class ReactiveEffect {
     private _fn: any
     deps = [];
@@ -18,10 +18,10 @@ class ReactiveEffect {
             return this._fn()
         }
 
-        shouldBeTracked = true;
+        shouldTrack = true;
         activeEffect = this;
         const result = this._fn()
-        shouldBeTracked = false
+        shouldTrack = false
 
         return result
 
@@ -47,7 +47,7 @@ function cleanup(effect) {
 const targetsMap = new Map();
 const isTracking = () => {
     //activeEffect maybe undefined
-    return shouldBeTracked && activeEffect !== undefined
+    return shouldTrack && activeEffect !== undefined
 }
 export function track(target, key) {
     if (!isTracking()) return
