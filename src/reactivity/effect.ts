@@ -1,5 +1,8 @@
 import { extend } from "../utils";
 
+let activeEffect
+let shouldBeTracked = true
+
 class ReactiveEffect {
     private _fn: any
     deps = [];
@@ -11,9 +14,17 @@ class ReactiveEffect {
     }
 
     run() {
-        activeEffect = this;
+        if (!this.active) {
+            return this._fn()
+        }
 
-        return this._fn()
+        shouldBeTracked = true;
+        activeEffect = this;
+        const result = this._fn()
+        shouldBeTracked = false
+
+        return result
+
     }
     stop() {
         if (this.active) {
@@ -34,7 +45,13 @@ function cleanup(effect) {
 
 
 const targetsMap = new Map();
+const isTracking = () => {
+    //activeEffect maybe undefined
+    return shouldBeTracked && activeEffect !== undefined
+}
 export function track(target, key) {
+    if (!isTracking()) return
+
     let depsMap = targetsMap.get(target);
     if (!depsMap) {
         depsMap = new Map();
@@ -47,13 +64,12 @@ export function track(target, key) {
         depsMap.set(key, dep);
     }
 
-    //activeEffect maybe undefined
-    if (!activeEffect) return
-
+    if (dep.has(activeEffect)) return
     //这里, 如何拿到需要被收集的依赖？（activeEffect的作用）
     dep.add(activeEffect)
     activeEffect.deps.push(dep);
 }
+
 
 export function trigger(target, key) {
     let depsMap = targetsMap.get(target);
@@ -66,8 +82,6 @@ export function trigger(target, key) {
         }
     })
 }
-
-let activeEffect
 export function effect(fn, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler)
 
