@@ -45,7 +45,7 @@ function cleanup(effect) {
 
 
 const targetsMap = new Map();
-const isTracking = () => {
+export function isTracking() {
     //activeEffect maybe undefined
     return shouldTrack && activeEffect !== undefined
 }
@@ -64,6 +64,11 @@ export function track(target, key) {
         depsMap.set(key, dep);
     }
 
+    trackEffects(dep);
+}
+
+export function trackEffects(dep) {
+
     if (dep.has(activeEffect)) return
     //这里, 如何拿到需要被收集的依赖？（activeEffect的作用）
     dep.add(activeEffect)
@@ -71,9 +76,13 @@ export function track(target, key) {
 }
 
 
+
 export function trigger(target, key) {
     let depsMap = targetsMap.get(target);
     let dep = depsMap.get(key);
+    triggerEffects(dep);
+}
+export function triggerEffects(dep) {
     dep.forEach((effect) => {
         if (effect.scheduler) {
             effect.scheduler();
@@ -81,6 +90,7 @@ export function trigger(target, key) {
             effect.run();
         }
     })
+
 }
 export function effect(fn, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler)
