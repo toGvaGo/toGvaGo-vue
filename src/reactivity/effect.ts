@@ -3,7 +3,7 @@ let activeEffect
 let shouldTrack = true
 
 import { extend } from "../utils";
-class ReactiveEffect {
+export class ReactiveEffect {
     private _fn: any
     deps = [];
     active = true;
