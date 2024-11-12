@@ -1,3 +1,4 @@
+import { publicInstanceProxyHandlers } from "./componentPublicInstance"
 
 
 export function createComponentInstance(vnode) {
@@ -12,9 +13,15 @@ export function createComponentInstance(vnode) {
 export function setupComponent(instance) {
     //TODO
     // initProps()
-    // initSlots()
+    // initSlots()  
+    setupStatefulComponent(instance)
+}
 
+export function setupStatefulComponent(instance) {
     const Component = instance.type
+
+    instance.proxy = new Proxy({ _: instance }, publicInstanceProxyHandlers)
+
     const { setup } = Component;
 
     if (setup) {

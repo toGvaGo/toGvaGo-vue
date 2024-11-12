@@ -6,9 +6,6 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
-
-    //TODO
-    //判断是 element 类型还是 component 类型
     console.log(vnode.type);
     if (typeof vnode.type === 'string') {
         processElement(vnode, container);
@@ -21,7 +18,7 @@ function processElement(vnode, container) {
     mountElement(vnode, container);
 }
 function mountElement(vnode, container) {
-    let el = document.createElement(vnode.type);
+    let el = (vnode.el = document.createElement(vnode.type));
 
     const { props } = vnode;
     for (const key in props) {
@@ -44,22 +41,24 @@ function mountChildren(vnode, container) {
     })
 }
 
-
 function processComponent(vnode: any, container: any) {
     mountComponent(vnode, container);
 }
-function mountComponent(vnode: any, container: any) {
-    const instance = createComponentInstance(vnode);
+function mountComponent(initialVNode: any, container: any) {
+    const instance = createComponentInstance(initialVNode);
 
     setupComponent(instance);
-    setupRenderEffect(instance, container);
+    setupRenderEffect(instance, initialVNode, container);
 }
 
-function setupRenderEffect(instance: any, container: any) {
-    const subTree = instance.render();
+function setupRenderEffect(instance: any, initialVNode: any, container: any) {
+    const { proxy } = instance
+    const subTree = instance.render.call(proxy)
 
 
     patch(subTree, container);
+
+    initialVNode.el = subTree.el
 
 }
 
