@@ -1,4 +1,5 @@
 import { h } from '../../lib/guide-toGvaGo-vue.esm.js';
+import { Foo } from './Foo.js';
 
 window.self = null;
 export const App = {
@@ -10,7 +11,8 @@ export const App = {
         id: 'root',
         class: ['red', 'blue']
       },
-      'hello, ' + this.title
+      [h('span', { class: 'red' }, 'hello,' + this.title), h(Foo, { count: 1 })]
+      // 'hello, ' + this.title
       // 'hello, toGvaGo'
       // [h('span', { class: 'red' }, 'hello, '), h('span', { class: 'blue' }, 'toGvaGO')]
     );
