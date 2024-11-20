@@ -1,5 +1,6 @@
 import { h } from '../../lib/guide-toGvaGo-vue.esm.js';
 import { Foo } from './Foo.js';
+import { createTextVNode } from '../../lib/guide-toGvaGo-vue.esm.js';
 
 window.self = null;
 export const App = {
@@ -13,7 +14,7 @@ export const App = {
       Foo,
       {},
       {
-        header: ({ age }) => h('p', {}, 'header: ' + age),
+        header: ({ age }) => [h('p', {}, 'header: ' + age), createTextVNode('你好你好')],
         footer: () => h('p', {}, 'footer')
       }
     );

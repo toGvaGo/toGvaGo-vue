@@ -21,7 +21,6 @@ export function createComponentInstance(vnode) {
 }
 
 export function setupComponent(instance) {
-    //TODO
     initProps(instance, instance.vnode.props)
     initSlots(instance, instance.vnode.children)
     setupStatefulComponent(instance)
