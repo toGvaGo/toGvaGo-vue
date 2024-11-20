@@ -2,7 +2,7 @@
 let activeEffect
 let shouldTrack = true
 
-import { extend } from "../utils";
+import { extend } from "../shared";
 export class ReactiveEffect {
     private _fn: any
     deps = [];
