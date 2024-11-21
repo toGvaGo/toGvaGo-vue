@@ -1,14 +1,12 @@
-import { h, renderSlots } from '../../lib/guide-toGvaGo-vue.esm.js';
+import { h, getCurrentInstance } from '../../lib/guide-toGvaGo-vue.esm.js';
 export const Foo = {
-  setup(props, { emit }) {
+  name: 'Foo',
+  setup() {
+    const instance = getCurrentInstance();
+    console.log('Foo:', instance);
     return {};
   },
   render() {
-    const foo = h('p', {}, 'foo');
-
-    console.log(this.$slots);
-    const age = 18;
-    // return h('div', {}, [foo, renderSlots(this.$slots)]);
-    return h('div', {}, [renderSlots(this.$slots, 'header', { age }), foo, renderSlots(this.$slots, 'footer')]);
+    return h('div', {}, 'foo');
   }
 };
