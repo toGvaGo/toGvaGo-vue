@@ -5,13 +5,16 @@ import { emit } from "./componentEmit";
 import { initSlots } from "./componentSlots";
 
 
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
+    console.log("createComponentInstance", parent)
     const component = {
         vnode,
         type: vnode.type,
         setupState: {},
         props: {},
         slots: {},
+        provides: parent ? parent.provides : {},
+        parent,
         emit: () => { }
     }
 
