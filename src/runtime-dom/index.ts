@@ -2,12 +2,12 @@ import { createRenderer } from '../runtime-core'
 import { isOn } from '../shared';
 
 function createElement(type) {
-    console.log('createElement--------------------------')
+    // console.log('createElement--------------------------')
     return document.createElement(type);
 }
 
 function patchProp(el, key, val) {
-    console.log('patchProp--------------------------')
+    // console.log('patchProp--------------------------')
     if (isOn(key)) {
         const event = key.slice(2).toLowerCase();
         el.addEventListener(event, val);
@@ -17,7 +17,7 @@ function patchProp(el, key, val) {
 }
 
 function insert(el, parent) {
-    console.log('insert--------------------------')
+    // console.log('insert--------------------------')
     // container.appendChild(el);
     parent.append(el);
 }
