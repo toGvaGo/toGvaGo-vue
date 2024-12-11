@@ -121,14 +121,12 @@ export function createRenderer(options) {
         }
         console.log(i, e1, e2);
         //新的更长
-        if (i > e1) {
-            if (i <= e2) {
-                const nextPos = e2 + 1;
-                const anchor = nextPos < l2 ? c2[nextPos].el : null
-                while (i <= e2) {
-                    patch(null, c2[i], container, parentComponent, anchor)
-                    i++;
-                }
+        if (i > e1 && i <= e2) {
+            const nextPos = e2 + 1;
+            const anchor = nextPos < l2 ? c2[nextPos].el : null
+            while (i <= e2) {
+                patch(null, c2[i], container, parentComponent, anchor)
+                i++;
             }
         } else if (i > e2) {//老的更长
             while (i <= e1) {
@@ -136,8 +134,73 @@ export function createRenderer(options) {
                 i++;
             }
         } else {
-            //TODO
-            //乱序部分
+            //中间对比
+            //删除
+            let s1 = i;
+            let s2 = i;
+
+            let toBePatched = e2 - s2 + 1;
+            let patched = 0;
+            const keyToNewIndexMap = new Map();
+
+            const newIndexToOldIndexMap = new Array(toBePatched).fill(0);
+            let moved = false;
+            let maxNewIndexSoFar = 0;
+            for (let i = s2; i <= e2; i++) {
+                const nextChild = c2[i];
+                keyToNewIndexMap.set(nextChild.key, i);
+            }
+            for (let i = s1; i <= e1; i++) {
+                const prevChild = c1[i];
+                if (patched >= toBePatched) {
+                    hostRemove(prevChild.el);
+                    continue;
+                }
+                let newIndex
+                if (prevChild.key !== null) {
+                    newIndex = keyToNewIndexMap.get(prevChild.key);
+                } else {
+                    for (let j = s2; j <= e2; j++) {
+                        if (isSameVNodeType(prevChild, c2[j])) {
+                            newIndex = j;
+                            break;
+                        }
+                    }
+                }
+
+                if (newIndex === undefined) {
+                    hostRemove(prevChild.el);
+                } else {
+                    if (newIndex >= maxNewIndexSoFar) {
+                        maxNewIndexSoFar = newIndex;
+                    } else {
+                        moved = true;
+                    }
+                    newIndexToOldIndexMap[newIndex - s2] = i + 1;
+                    patch(prevChild, c2[newIndex], container, parentComponent, null);
+                    patched++;
+                }
+            }
+
+            //最长递增子序列
+            const increasingNewIndexSequence = moved ? getSequence(newIndexToOldIndexMap) : [];
+            let j = increasingNewIndexSequence.length - 1;
+
+            for (let i = toBePatched - 1; i >= 0; i--) {
+                const nextIndex = i + s2;
+                const nextChild = c2[nextIndex];
+                const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : null;
+                if (newIndexToOldIndexMap[i] === 0) {
+                    patch(null, nextChild, container, parentComponent, anchor)
+                } else if (moved) {
+                    if (j < 0 || i !== increasingNewIndexSequence[j]) {
+                        console.log('需要移动')
+                        hostInsert(nextChild.el, container, anchor);
+                    } else {
+                        j--;
+                    }
+                }
+            }
         }
     }
 
@@ -243,3 +306,25 @@ export function createRenderer(options) {
     }
 }
 
+function getSequence(arr) {
+    let lengthDP = new Array(arr.length).fill(1);
+    let sequenceDP = new Array(arr.length);
+    let maxLength = 1;
+    let maxIndex = 0;
+    for (let i = 0; i < arr.length; i++) {
+        sequenceDP[i] = [i];
+        for (let j = i; j >= 0; j--) {
+            if (arr[i] > arr[j]) {
+                if (lengthDP[j] + 1 > lengthDP[i]) {
+                    lengthDP[i] = lengthDP[j] + 1;
+                    sequenceDP[i] = [...sequenceDP[j], i];
+                }
+            }
+        }
+        if (lengthDP[i] > maxLength) {
+            maxLength = lengthDP[i];
+            maxIndex = i;
+        }
+    }
+    return sequenceDP[maxIndex];
+};
