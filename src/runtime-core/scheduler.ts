@@ -1,6 +1,7 @@
 
 
 const queue: any[] = [];
+const activePreFlushCbs: any[] = [];
 
 let isFlushPending = false;
 
@@ -17,6 +18,12 @@ export function queueJobs(job) {
 
     queueFlush();
 }
+
+export function queuePreFlushCb(cb) {
+    activePreFlushCbs.push(cb);
+    queueFlush();
+}
+
 function queueFlush() {
 
     if (isFlushPending) return;
@@ -27,8 +34,16 @@ function queueFlush() {
 function flusJobs() {
     isFlushPending = false
 
+    flushPreFlushCbs();
+
     let job
     while ((job = queue.shift())) {
         job && job();
+    }
+}
+
+function flushPreFlushCbs() {
+    for (let i = 0; i < activePreFlushCbs.length; i++) {
+        activePreFlushCbs[i]();
     }
 }
